@@ -63,6 +63,7 @@ to nil if you want to disable multiple line highlight support."
 
 (defun scala-mark-borders (funs)
   (loop for (fun . flag) in funs
+        do (scala-forward-ignorable)
         if flag collect (point-marker)
         while (funcall fun)
         if flag collect (point-marker)))
@@ -81,18 +82,20 @@ to nil if you want to disable multiple line highlight support."
   "Find font lock limit and mark multiple line construct in
 current context."
   (let ((p0 (point))
-        (p1 (save-excursion (end-of-line) (point))))
+        (p1 (line-end-position)))
     ;; multiple line construct will only start with '[' or '(', not '{'
-    (when (looking-at "[ \t\n]*[\\[(]")
+    (scala-forward-ignorable)
+    (when (looking-at "[\\[(]")
       (save-excursion
         ;; skip all parameter groups in "def foo(a: Int)(b: Int)"
-        (while (looking-at "[ \t\n]*[\\[(]")
+        (while (progn (scala-forward-ignorable) (looking-at "[\\[(]"))
           (condition-case ex
               (forward-list)
             ('error
              ;; Hack: Find next keyword when parentheses are not balanced.  Here
              ;; we assume that next keyword will not be too far from current
              ;; position, so will not cause emacs slow down too much.
+             ;; TODO: add also = and { here
              (unless (search-forward-regexp scala-keywords-re nil t)
                (end-of-line))))
           (setq p1 (point))))
@@ -102,7 +105,7 @@ current context."
 
 
 (defun scala-match-and-skip-binding (limit)
-  (skip-chars-forward " ()")
+  (skip-chars-forward ",(")
   (and (not (or (looking-at "\\<\\(extends\\|with\\)\\>\\|{")
                 (scala-looking-at-special-identifier scala-binding-end-re)))
        (ignore-errors
@@ -111,16 +114,15 @@ current context."
            (let ((matches (scala-make-match
                            '((scala-forward-ident . t)
                              ((lambda ()
-                                (scala-forward-ignorable)
-                                (when (scala-looking-at-special-identifier ":")
+                                (when (= (char-after) ?:)
                                   (forward-char)
-                                  (scala-forward-ignorable)
                                   t)) . nil)
                              ((lambda ()
                                 (scala-forward-type)
                                 (scala-when-looking-at "\\s *\\*")
                                 t) . t)))))
-             (scala-when-looking-at "\\s *,")
+             (scala-forward-ignorable)
+             (skip-chars-forward ",)")
              (set-match-data matches)))
          t)))
 
@@ -132,14 +134,17 @@ current context."
     t))
 
 (defun scala-match-and-skip-type-param (limit)
-  (scala-when-looking-at "\\s *[[,]\\s *"
+  (scala-forward-ignorable)
+  (scala-when-looking-at "[[,]"
     (let ((matches (scala-make-match '((scala-forward-type-param . t)))))
-      (while (scala-when-looking-at "[\s \n\t]*\\]"))
+      (while (progn (scala-forward-ignorable) (scala-when-looking-at "\\]")))
       (set-match-data matches)
       t)))
 
 (defun scala-match-and-skip-result-type (limit)
-  (scala-when-looking-at "\\s *:\\s *"
+  (scala-forward-ignorable)
+  (scala-when-looking-at ":"
+    (scala-forward-ignorable)
     (set-match-data (list (point-marker)
                           (progn (scala-forward-type) (point-marker))))
     t))
@@ -151,6 +156,7 @@ current context."
   (regexp-opt '( "=>" "=" "<-") t))
 
 (defun scala-match-and-skip-pattern (limit)
+  (scala-forward-ignorable)
   (while (progn
            (skip-chars-forward "()[], ")
            (and (not (or (looking-at scala-pattern-end-re)
@@ -187,8 +193,7 @@ current context."
 
     ;; variables
     ("\\<var\\>"
-     (scala-match-and-skip-binding (goto-char (match-end 0))
-				   nil
+     (scala-match-and-skip-binding nil nil
 				   (1 font-lock-variable-name-face nil)
 				   (2 font-lock-type-face nil t)))
 
@@ -197,12 +202,9 @@ current context."
 	      "\\s *"
 	      "\\("
 	      scala-ident-re
-	      "\\)\\s *")
+	      "\\)")
      (2 font-lock-function-name-face nil)
-     (scala-match-and-skip-type-param (progn
-                                        (goto-char (match-end 0))
-                                        (scala-font-lock-limit))
-                                        nil
+     (scala-match-and-skip-type-param (scala-font-lock-limit) nil
 				      (1 font-lock-type-face nil t))
      (scala-match-and-skip-binding (scala-font-lock-limit) nil
 				   (1 font-lock-variable-name-face nil)
@@ -212,7 +214,7 @@ current context."
 
     ;; class definitions
     ("\\<\\(class\\|trait\\)\\>"
-     (scala-match-and-skip-ident (goto-char (match-end 0)) nil
+     (scala-match-and-skip-ident nil nil
 				 (1 font-lock-type-face nil))
      (scala-match-and-skip-type-param (scala-font-lock-limit) nil
 				      (1 font-lock-type-face nil t))
@@ -228,8 +230,8 @@ current context."
 				      (1 font-lock-type-face nil t)))
 
     ;; patterns
-    ("\\<\\(case\\|val\\)\\>\\s *"
-     (scala-match-and-skip-pattern (goto-char (match-end 0)) nil
+    ("\\<\\(case\\|val\\)\\>"
+     (scala-match-and-skip-pattern nil nil
 				   (1 font-lock-variable-name-face nil)
 				   (2 font-lock-type-face nil t)))
     ))
