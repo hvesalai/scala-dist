@@ -150,8 +150,7 @@ private class Foo {
 }
 
 private class Foo(x: Int,
-                  y: Int,
-                  z: Int) // KNOWN ISSUE in font-lock mode
+                  y: Int) // KNOWN ISSUE in font-lock mode (fixed)
 
 private[Foo] class Foo(x: Int, y: Int) extends Bar(x, y)
                                        with Zot { self: /* */ Option[String,
@@ -323,9 +322,16 @@ private[Foo] class Foo(x: Int, y: Int) extends Bar(x, y)
 
 /* font lock */
 private/* */class/* */Foo/* */[+T]/* */(i: X,
-                                        j: Y) // KNOWN ISSUE: does not highlight when typed
+                                        j: Y) // KNOWN ISSUE: does not highlight when typed (FIXED)
+
 
 {
+  def foo(y: (String, Boolean), 
+          z: (String, Boolean)): (String, Boolean) = y
+
+  def foo(y: Int, x: String,
+          b: Bar,,,,,)(y: Int, x: Int, y:::): (Int => Foo) = bar
+
   def x = 1
   
   def/* */x/* */=/* */1 // KNOWN ISSUE: x is with wrong face
@@ -334,13 +340,18 @@ private/* */class/* */Foo/* */[+T]/* */(i: X,
           y: Int/* */, // KNOWN ISSUE: Int should be highlighted
           z: Boolean)
          (x: Int) // KNOWN ISSUE(S): '(' is highted, curry is not highlighted when typed
-    
+
   def foo(@annotation // KNOWN ISSUE: annotations are in parameter name font face
           x: String)
   
   val x = new Foo(1,
                   2,
                   3)
-          with Bar // KNOWN ISSUE: bar is in wrong font-face (should be same as Foo)  
+          with Bar // KNOWN ISSUE: bar is in wrong font-face (should be same as Foo)
+
+  val x: String = "foo"
 }
 
+def x(s: String,
+      y: String,
+      z: String
