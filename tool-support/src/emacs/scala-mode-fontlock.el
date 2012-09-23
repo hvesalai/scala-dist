@@ -75,7 +75,10 @@ to nil if you want to disable multiple line highlight support."
     (cons start-mark (cons end-mark markers))))
 
 (defconst scala-binding-end-re
-  (regexp-opt '(":" "=" "=>" ";" "<-")))
+  (regexp-opt '("=" "=>" ";" "<-")))
+
+(defconst scala-font-lock-limit-re
+  (concat scala-binding-end-re "\\|" scala-keywords-re))
 
 
 (defun scala-font-lock-limit ()
@@ -88,25 +91,34 @@ current context."
     (when (looking-at "[\\[(]")
       (save-excursion
         ;; skip all parameter groups in "def foo(a: Int)(b: Int)"
-        (while (progn (scala-forward-ignorable) (looking-at "[\\[(]"))
-          (condition-case ex
-              (forward-list)
-            ('error
-             ;; Hack: Find next keyword when parentheses are not balanced.  Here
-             ;; we assume that next keyword will not be too far from current
-             ;; position, so will not cause emacs slow down too much.
-             ;; TODO: add also = and { here
-             (unless (search-forward-regexp scala-keywords-re nil t)
-               (end-of-line))))
-          (setq p1 (point))))
+        (while (progn (save-excursion (scala-forward-ignorable) (looking-at "[\\[(]")))
+          (scala-forward-ignorable)
+          ;; forward the list, but if that's not possible, to the first empty line
+          ;; or end of buffer
+          (let ((limit (scala-point-after 
+                        (condition-case ex (forward-list)
+                          ('error (unless (search-forward-regexp scala-empty-line-re nil t)
+                                    (end-of-buffer)))))))
+            ;; just check that there is no keywords within limit
+            (unless (search-forward-regexp scala-font-lock-limit-re limit t)
+              (goto-char limit))))
+        ;; if we ended at the end of ')' or ']', there might be more coming, include next line
+        ;; (if empty) to the limit
+        (when (and (eq (char-syntax (char-before)) ?\))
+                   (progn (scala-forward-ignorable) (scala-looking-at-empty-line)))
+          (search-forward-regexp scala-empty-line-re nil t))
+        (setq p1 (point)))
       (when scala-mode-fontlock:multiline-highlight
         (put-text-property p0 p1 'font-lock-multiline t)))
     p1))
 
 
 (defun scala-match-and-skip-binding (limit)
+  (scala-forward-ignorable)
   (skip-chars-forward ",(")
+  (scala-forward-ignorable)
   (and (not (or (looking-at "\\<\\(extends\\|with\\)\\>\\|{")
+                (= (char-after) ?:)
                 (scala-looking-at-special-identifier scala-binding-end-re)))
        (ignore-errors
          (save-restriction
