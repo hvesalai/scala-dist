@@ -192,6 +192,10 @@ private/* */class/* */Foo/* */[+T]/* */(i: X,
 
   def foo(@annotation // KNOWN ISSUE: annotations are in parameter name font face
           x: String)
+
+  def foo(x: String = new List(a, b == c),
+          x: String,
+          yyy: String)
   
   val x = new Foo(1,
                   2,
@@ -205,4 +209,6 @@ private/* */class/* */Foo/* */[+T]/* */(i: X,
 
 def x(s: String,
       y: String,
-      z: String
+      z: String,
+      x: String)
+      

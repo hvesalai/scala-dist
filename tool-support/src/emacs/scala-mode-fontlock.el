@@ -93,17 +93,18 @@ current context."
         ;; skip all parameter groups in "def foo(a: Int)(b: Int)"
         (while (progn (save-excursion (scala-forward-ignorable) (looking-at "[\\[(]")))
           (scala-forward-ignorable)
-          ;; forward the list, but if that's not possible, to the first empty line
-          ;; or end of buffer
-          (let ((limit (scala-point-after 
-                        (condition-case ex (forward-list)
-                          ('error (unless (search-forward-regexp scala-empty-line-re nil t)
-                                    (end-of-buffer)))))))
-            ;; just check that there is no keywords within limit
-            (unless (search-forward-regexp scala-font-lock-limit-re limit t)
-              (goto-char limit))))
-        ;; if we ended at the end of ')' or ']', there might be more coming, include next line
-        ;; (if empty) to the limit
+          ;; forward the list, but if that's not possible, to the first empty line, 
+          ;; end of block, or end of buffer (which ever is first)
+          (let ((pos (point)))
+            (ignore-errors (forward-list))
+            (when (or (= (char-before) ?\})
+                      (= pos (point)))
+              (let ((limit (if (= pos (point)) (buffer-size) (point))))
+                (goto-char pos)
+                (unless (search-forward-regexp scala-empty-line-re limit t)
+                  (end-of-buffer))))))
+        ;; if we ended at the end of ')' or ']', there might be more
+        ;; coming, include next line (if empty) to the limit
         (when (and (eq (char-syntax (char-before)) ?\))
                    (progn (scala-forward-ignorable) (scala-looking-at-empty-line)))
           (search-forward-regexp scala-empty-line-re nil t))
@@ -134,6 +135,10 @@ current context."
                                 (scala-when-looking-at "\\s *\\*")
                                 t) . t)))))
              (scala-forward-ignorable)
+             ;; forward parameter default value
+             (when (= (char-after) ?=)
+               (skip-syntax-forward "^,)")
+               )
              (skip-chars-forward ",)")
              (set-match-data matches)))
          t)))
