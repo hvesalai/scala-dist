@@ -188,6 +188,9 @@ current context."
   `(;; keywords
     (,scala-keywords-re 0 font-lock-keyword-face nil)
 
+    ;; annotations
+    (,scala-annotation-re 0 font-lock-preprocessor-face nil)
+
     ;; constants
     (,scala-constants-re
      0 ,(if (boundp 'font-lock-constant-face)
