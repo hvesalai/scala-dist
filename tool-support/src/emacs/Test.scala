@@ -19,6 +19,11 @@ def collect[L,R](futures: Seq[MappableFuture[Either[L,R]]]) =
   }
 }
 
+{
+  val foo, zot = Seq() put: Bar Blah
+
+  var singlequote = Seq() put: Bar Blah // BUG: leaking from some bindings
+}
 
 package foo
 
@@ -320,9 +325,12 @@ private[Foo] class Foo(x: Int, y: Int) extends Bar(x, y)
   
 }
 
+
 /* font lock */
 private/* */class/* */Foo/* */[+T]/* */(i: X,
                                         j: Y) // KNOWN ISSUE: does not highlight when typed (FIXED)
+
+
 
 
 {
@@ -341,7 +349,7 @@ private/* */class/* */Foo/* */[+T]/* */(i: X,
           z: Boolean)
          (x: Int) // KNOWN ISSUE(S): '(' is highted, curry is not highlighted when typed
 
-  def foo(@annotation // KNOWN ISSUE: annotations are in parameter name font face (FIXED)
+  def foo(@annotation // KNOWN ISSUE: annotations are in parameter name font face
           x: String)
   
   val x = new Foo(1,
