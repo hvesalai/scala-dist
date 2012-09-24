@@ -191,6 +191,9 @@ current context."
     ;; annotations
     (,scala-annotation-re 0 font-lock-preprocessor-face nil)
 
+    ;; symbols
+    (,scala-symbol-re 0 font-lock-string-face nil)
+
     ;; constants
     (,scala-constants-re
      0 ,(if (boundp 'font-lock-constant-face)

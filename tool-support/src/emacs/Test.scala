@@ -334,7 +334,7 @@ private/* */class/* */Foo/* */[+T]/* */(i: X,
 
 
 {
-  def foo(y: (String, Boolean), 
+  def foo(y: (String, Boolean) = ("fooabr", 2), 
           z: (String, Boolean)): (String, Boolean) = y
 
   def foo(y: Int, x: String,
@@ -358,6 +358,10 @@ private/* */class/* */Foo/* */[+T]/* */(i: X,
           with Bar // KNOWN ISSUE: bar is in wrong font-face (should be same as Foo)
 
   val x: String = "foo"
+
+  var symbol = 'symbol
+
+  var char = 'a'
 }
 
 def x(s: String,
