@@ -194,6 +194,9 @@ current context."
     ;; symbols
     (,scala-symbol-re 0 font-lock-string-face nil)
 
+    ;; chars
+    (,scala-char-re 0 font-lock-string-face nil)
+
     ;; constants
     (,scala-constants-re
      0 ,(if (boundp 'font-lock-constant-face)
@@ -255,5 +258,6 @@ current context."
     ))
 
 
-(defvar scala-font-lock-syntactic-keywords
-  `((,scala-char-re (0 "\"" t nil))))
+(defvar scala-font-lock-syntactic-keywords 
+  ;; highligh '"' correctly
+  `(("'\"'" (0 "\"" t nil))))

@@ -175,7 +175,7 @@ private/* */class/* */Foo/* */[+T]/* */(i: X,
 
 
 {
-  def foo(y: (String, Boolean) = ("fooabr", 2), 
+  def foo(y: (String, Boolean), 
           z: (String, Boolean)): (String, Boolean) = y
 
   def foo(y: Int, x: String,
@@ -200,9 +200,7 @@ private/* */class/* */Foo/* */[+T]/* */(i: X,
 
   val x: String = "foo"
 
-  var symbol = 'symbol
-
-  var char = 'a'
+  val chars = Seq(''', '"', '\'', '\"', '\a', '\r', '\u00AF', '\u00af')
 }
 
 def x(s: String,
