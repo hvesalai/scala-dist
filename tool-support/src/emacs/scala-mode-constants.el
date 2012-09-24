@@ -176,6 +176,9 @@ reserved keywords when used alone.")
 (defconst scala-annotation-re
   (concat "\\@" scala-ident-re))
 
+(defconst scala-symbol-re
+  (concat "\\('" scala-ident-re "\\)[^']" ))
+
 (defconst scala-var-ident-re
   (concat "[[:lower:]][[:alnum:]]*" "\\(_" scala-ident-re "\\)*")
   "Relgular expression matching a Scala 'variable' identifier.")
