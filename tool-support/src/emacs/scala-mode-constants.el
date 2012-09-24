@@ -123,7 +123,7 @@
   "Regular expression matching a Scala string literal.")
 
 (defconst scala-char-re
-  "'\\([^\\\\]\\|\\(\\\\[^']\\)\\)'"
+  (concat "'\\(" "[^\\\\]" "\\|" "\\(\\\\['btnfr\"\\\\]\\)" "\\|" "\\(\\\\u[a-fA-F0-9]\\{4\\}\\)" "\\)'")
   "Regular expression matching a Scala character literal.")
 
 (defconst scala-literal-re
