@@ -341,7 +341,7 @@ private/* */class/* */Foo/* */[+T]/* */(i: X,
           z: Boolean)
          (x: Int) // KNOWN ISSUE(S): '(' is highted, curry is not highlighted when typed
 
-  def foo(@annotation // KNOWN ISSUE: annotations are in parameter name font face
+  def foo(@annotation // KNOWN ISSUE: annotations are in parameter name font face (FIXED)
           x: String)
   
   val x = new Foo(1,
