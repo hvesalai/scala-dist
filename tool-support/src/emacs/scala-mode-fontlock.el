@@ -264,5 +264,12 @@ current context."
 
 
 (defvar scala-font-lock-syntactic-keywords 
-  ;; highligh '"' correctly
-  `(("'\"'" (0 "\"" t nil))))
+  `(
+    ;; highlight '\"'
+    ("'\\(\"\\)'" (1 "." t nil))
+    ;; highlight """""f""o"o"""""
+    ("\\(\"\\)\\(\"\"\\(\"?\"?[^\"]\\)*\"?\"?\"\"\\)\\(\"\\)"
+     (1 "\"" t nil)
+     (2 "." t nil)
+     (4 "\"" t nil))
+    ))

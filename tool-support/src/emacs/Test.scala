@@ -1,3 +1,5 @@
+
+
 {
   val foo, zot = Seq() put: Bar Blah
 
@@ -202,7 +204,16 @@ private/* */class/* */Foo/* */[+T]/* */(i: X,
                   3)
           with Bar // KNOWN ISSUE: bar is in wrong font-face (should be same as Foo)
 
-  val x: String = "foo"
+  val x: String = """ ""asasasf""o"o" asdasdasd"""
+asdasdasd
+asdasd
+asdasdasd
+asdasda
+
+asdasdasd
+asd
+asdasdasd
+""".something
 
   val chars = Seq(''', '"', '\'', '\"', '\a', '\r', '\u00AF', '\u00af')
 }
@@ -212,3 +223,14 @@ def x(s: String,
       z: String,
       x: String)
       
+/* */
+
+1
+
+/** **/
+
+2
+
+// 3
+
+3
